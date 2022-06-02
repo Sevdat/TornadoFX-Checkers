@@ -90,17 +90,19 @@ override val root = pane {
                     var signY = list[count].second
 
                     if (count in 0..1) {
-                        
+
                         if (this.fill == Color.WHITE) signY = -signY
                         val diagonal = allCircles
                             .find { e -> e.contains(this.centerX + signX, this.centerY + signY) }
+                        var diagonal2 = false
                         if (diagonal != null) {
                             if (diagonal.fill != this.fill) {
                                 signX *= 2
                                 signY *= 2
+                                diagonal2 = true
                             }
                         }
-                        if (diagonal?.fill != this.fill) {
+                        if (diagonal?.fill != this.fill && !diagonal2) {
                             pathList += pieces(this.centerX + signX, this.centerY + signY, Color.DARKBLUE)
                         }
                         pick += pieces(this.centerX, this.centerY, Color.GREEN)
