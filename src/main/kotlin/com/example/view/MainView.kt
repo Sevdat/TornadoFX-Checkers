@@ -11,33 +11,45 @@ class MainView : View("Russian Checkers") {
 
 override val root = pane {
     val allCircles = mutableListOf<Circle>()
-    val blackCircles = mutableListOf<Circle>()
-    val whiteCircles = mutableListOf<Circle>()
     val pathList = mutableListOf<Circle>()
     val pick= mutableListOf<Circle>()
 
-    fun blackPiece(startX: Double,startY: Double): Circle {
-        return circle(startX, startY ,30){
-            stroke = Color.WHITE
-            strokeWidth = 3.0
-            blackCircles.add(this)
-            allCircles.add(this)
-        }
-    }
-    fun whitePiece(startX: Double, startY: Double, f: Color): Circle {
-        return circle(startX, startY ,30){
+    fun pieces(startX: Double, startY: Double, f: Color): Circle {
+        return circle(startX, startY){
             fill = f
-            stroke = Color.BLACK
-            strokeWidth = 3.0
-            whiteCircles.add(this)
-            allCircles.add(this)
+            when (f) {
+                Color.BLACK -> {
+                    run {
+                        radius = 30.0
+                        stroke = Color.WHITE
+                        strokeWidth = 3.0
+                    }
+                    allCircles.add(this)
+                }
+                Color.WHITE -> {
+                   run {
+                        radius = 30.0
+                        stroke = Color.BLACK
+                        strokeWidth = 3.0
+                    }
+                    allCircles.add(this)
+                }
+                Color.GREEN -> {
+                    run {
+                        radius = 15.0
+                    }
+                    pick.add(this)
+                }
+                Color.DARKBLUE -> {
+                    run {
+                        radius = 15.0
+                    }
+                    pathList.add(this)
+                }
+            }
         }
     }
-    fun path(startX: Double, startY: Double, f: Color): Circle {
-        return circle(startX, startY ,15){
-            fill = f
-        }
-    }
+
     fun choose(evt: MouseEvent) {
 
         allCircles.firstOrNull{
@@ -81,20 +93,22 @@ override val root = pane {
                         
                         if (this.fill == Color.WHITE) signY = -signY
                         val diagonal = allCircles
-                            .find { e -> e.contains(this.centerX + signX, this.centerY + signY)  }
-                        
-                        if (diagonal in allCircles) {
-                            signX *= 2
-                            signY *= 2
+                            .find { e -> e.contains(this.centerX + signX, this.centerY + signY) }
+                        if (diagonal != null) {
+                            if (diagonal.fill != this.fill) {
+                                signX *= 2
+                                signY *= 2
+                            }
                         }
-                        pathList += path(this.centerX + signX, this.centerY + signY, Color.DARKBLUE)
-                        pick += path(this.centerX, this.centerY, Color.GREEN)
+                        if (diagonal?.fill != this.fill) {
+                            pathList += pieces(this.centerX + signX, this.centerY + signY, Color.DARKBLUE)
+                        }
+                        pick += pieces(this.centerX, this.centerY, Color.GREEN)
                     }
                     count +=1
                 }
             }
-            whiteCircles.forEach { it.toFront() }
-            blackCircles.forEach { it.toFront() }
+            allCircles.forEach { it.toFront() }
             pick.forEach { it.toFront() }
         }
     }
@@ -112,8 +126,8 @@ override val root = pane {
                             fill = Paint.valueOf("#a94442")
                         }.toBack()
                         when (yCor != 300 || yCor != 200){
-                            (yCor < 300)-> whitePiece(50.0 + xCor, 750.0 - yCor, Color.WHITE)
-                            (yCor > 400)-> blackPiece(50.0 + xCor, 750.0 - yCor)
+                            (yCor < 300)-> pieces(50.0 + xCor, 750.0 - yCor, Color.WHITE)
+                            (yCor > 400)-> pieces(50.0 + xCor, 750.0 - yCor, Color.BLACK )
                         }
 
                     }
