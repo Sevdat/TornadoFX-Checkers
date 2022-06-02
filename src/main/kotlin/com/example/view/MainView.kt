@@ -14,7 +14,7 @@ override val root = pane {
     val blackCircles = mutableListOf<Circle>()
     val whiteCircles = mutableListOf<Circle>()
     val pathList = mutableListOf<Circle>()
-    val pick = mutableListOf<Circle>()
+    val pick= mutableListOf<Circle>()
 
     fun blackPiece(startX: Double,startY: Double): Circle {
         return circle(startX, startY ,30){
@@ -51,15 +51,15 @@ override val root = pane {
             }.apply {
                 pathList.forEach { it.toFront() }
                 if (this != null) {
-                    val yo = this.centerX - 30
-                    val oy = this.centerY - 30
+                    val newLocX = this.centerX - 30
+                    val newLocY = this.centerY - 30
 
                     allCircles.find { e -> e.contains(pick[0].centerX,pick[0].centerY)  }?.apply {
-                        centerX = yo
-                        centerY = oy
+                        centerX = newLocX
+                        centerY = newLocY
                         relocate(centerX - 30,centerY - 30 )
-                        centerX = yo + 30
-                        centerY = oy + 30
+                        centerX = newLocX + 30
+                        centerY = newLocY + 30
                     }
                 }
             }
@@ -71,78 +71,24 @@ override val root = pane {
             if (this != null) {
 
                 var count = 0
-                var signX = 0
-                var signY = 0
 
                 while (count != 4) {
-                    when (count){
-                        0 -> {
-                            signX = 100
-                            signY = 100
-                        }
-                        1 -> {
-                            signX = -100
-                            signY = 100
-                        }
-                        2 -> {
-                            signX = 100
-                            signY = -100
-                        }
-                        3 -> {
-                            signX = -100
-                            signY = -100
-                        }
-                    }
-                    val wLocation = whiteCircles
-                        .find { e -> e.contains(this.centerX, this.centerY)  }
-                    val bLocation = blackCircles
-                        .find { k -> k.contains(this.centerX, this.centerY)  }
+                    val list = listOf(Pair(100,100),Pair(-100,100),Pair(100,-100),Pair(-100,-100))
+                    var signX = list[count].first
+                    var signY = list[count].second
 
-                    val bDiagonal = blackCircles
-                        .find { k -> k.contains(this.centerX + signX, this.centerY - signY)  }
-                    val wDiagonal = whiteCircles
-                        .find { e -> e.contains(this.centerX + signX, this.centerY + signY)  }
-
-                    val wDiagonal2 = whiteCircles
-                        .find { e -> e.contains(this.centerX + signX*2, this.centerY + signY*2)  }
-                    val bDiagonal2 = blackCircles
-                        .find { k -> k.contains(this.centerX + signX*2, this.centerY - signY*2)  }
-                    when (this) {
-                        in blackCircles -> {
-                            if (count in 0..1) {
-                                if (bLocation != null && wDiagonal != null) {
-                                    if ((bLocation.centerX - wDiagonal.centerX == 100.0 && wDiagonal.centerY - bLocation.centerY == 100.0) ||
-                                        (wDiagonal.centerY - bLocation.centerY == 100.0 && wDiagonal.centerY - bLocation.centerY == 100.0) &&
-                                        wDiagonal2 == null) {
-                                        signX *= 2
-                                        signY *= 2
-                                    }
-
-                                }
-                                pathList += path(this.centerX + signX, this.centerY + signY, Color.DARKBLUE)
-                                pick += path(this.centerX, this.centerY, Color.GREEN)
-                            }
+                    if (count in 0..1) {
+                        
+                        if (this.fill == Color.WHITE) signY = -signY
+                        val diagonal = allCircles
+                            .find { e -> e.contains(this.centerX + signX, this.centerY + signY)  }
+                        
+                        if (diagonal in allCircles) {
+                            signX *= 2
+                            signY *= 2
                         }
-                        in whiteCircles -> {
-                            if (count in 0..1) {
-                                if (wLocation != null && bDiagonal != null) {
-                                    if ((bDiagonal.centerX- wLocation.centerX  == 100.0 &&
-                                        wLocation.centerY - bDiagonal.centerY == 100.0) ||
-                                        (wLocation.centerX - bDiagonal.centerX == 100.0 &&
-                                                wLocation.centerY - bDiagonal.centerY == 100.0 )) {
-                                        if (bDiagonal2 == null) {
-                                            signX *= 2
-                                            signY *= 2
-                                        } else {
-                                            signX *= 0
-                                            signY *= 0
-                                        }
-                                    }
-                                }
-                                pathList += path(this.centerX + signX, this.centerY - signY, Color.DARKBLUE)
-                                pick += path(this.centerX, this.centerY, Color.GREEN)
-                            }
-                        }
+                        pathList += path(this.centerX + signX, this.centerY + signY, Color.DARKBLUE)
+                        pick += path(this.centerX, this.centerY, Color.GREEN)
                     }
                     count +=1
                 }
