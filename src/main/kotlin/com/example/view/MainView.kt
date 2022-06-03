@@ -108,7 +108,6 @@ override val root = pane {
                     count +=1
                 }
             }
-            allCircles.forEach { it.toFront() }
             pick.forEach { it.toFront() }
         }
     }
