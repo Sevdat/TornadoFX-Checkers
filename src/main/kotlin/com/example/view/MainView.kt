@@ -1,132 +1,212 @@
 package com.example.view
 
+import javafx.scene.Node
 import javafx.scene.input.MouseEvent
+import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.scene.shape.Circle
+import javafx.scene.shape.Rectangle
 import tornadofx.*
 
 
 class MainView : View("Russian Checkers") {
 
-override val root = pane {
-    val allCircles = mutableListOf<Circle>()
-    val pathList = mutableListOf<Circle>()
-    val pick= mutableListOf<Circle>()
+    override val root: Pane = pane {
+//    val cancer = group()
+        val rectangle = group()
+        val allCircles = mutableListOf<Circle>()
+        val dama = mutableListOf<Circle>()
 
-    fun pieces(startX: Double, startY: Double, f: Color): Circle {
-        return circle(startX, startY){
-            fill = f
-            when (f) {
-                Color.BLACK -> {
-                    run {
-                        radius = 30.0
-                        stroke = Color.WHITE
-                        strokeWidth = 3.0
+        fun pieces(startX: Double, startY: Double, f: Color): Circle {
+            return circle(startX, startY) {
+                fill = f
+                when (f) {
+                    Color.BLACK -> {
+                        run {
+                            radius = 30.0
+                            stroke = Color.WHITE
+                            strokeWidth = 3.0
+                        }
+                        allCircles.add(this)
                     }
-                    allCircles.add(this)
-                }
-                Color.WHITE -> {
-                   run {
-                        radius = 30.0
-                        stroke = Color.BLACK
-                        strokeWidth = 3.0
+                    Color.WHITE -> {
+                        run {
+                            radius = 30.0
+                            stroke = Color.BLACK
+                            strokeWidth = 3.0
+                        }
+                        allCircles.add(this)
                     }
-                    allCircles.add(this)
-                }
-                Color.GREEN -> {
-                    run {
-                        radius = 15.0
+                    Color.GREEN -> {
+                        run {
+                            radius = 15.0
+                        }
                     }
-                    pick.add(this)
-                }
-                Color.DARKBLUE -> {
-                    run {
-                        radius = 15.0
+                    Color.DARKBLUE -> {
+                        run {
+                            radius = 15.0
+                        }
                     }
-                    pathList.add(this)
                 }
             }
         }
-    }
 
-    fun choose(evt: MouseEvent) {
+        var pathList1: Circle? = null
+        var pathList2: Circle? = null
+        var pathList3: Circle? = null
+        var pathList4: Circle? = null
+        var pick: Circle? = null
+        fun choose(evt: MouseEvent) {
 
-        allCircles.firstOrNull{
-            val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
-            it.contains(mousePt)
-        }.apply {
 
-            pathList.firstOrNull{
+            var t = rectangle.children.firstOrNull {
+                val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
+                it.contains(mousePt)
+            }
+
+//            val childrenCopy = mutableListOf<Node>()
+//            childrenCopy.addAll(rectangle.children)
+//            rectangle.children.clear()
+//            childrenCopy.forEach {
+//                it->
+//                    if(!it.equals(t)){
+//                        rectangle.children.add(it)
+//                    }
+//            }
+
+            rectangle.children.firstOrNull {
                 val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
                 it.contains(mousePt)
             }.apply {
-                pathList.forEach { it.toFront() }
+                this as Rectangle?
+                val current = allCircles.find { e -> e.contains(this?.x?.plus(50) ?: 0.0 , this?.y?.plus(50) ?: 0.0) }
+
+                if (pathList1 != null) pathList1?.removeFromParent()
+                if (pathList2 != null) pathList2?.removeFromParent()
+                if (pathList3 != null) pathList3?.removeFromParent()
+                if (pathList4 != null) pathList4?.removeFromParent()
                 if (this != null) {
-                    val newLocX = this.centerX - 30
-                    val newLocY = this.centerY - 30
+                    var count = 0
+                    while (count != 4) {
+                        val list = listOf(Pair(100, 100), Pair(-100, 100), Pair(100, -100), Pair(-100, -100))
+                        var signX = list[count].first
+                        var signY = list[count].second
 
-                    allCircles.find { e -> e.contains(pick[0].centerX,pick[0].centerY)  }?.apply {
-                        centerX = newLocX
-                        centerY = newLocY
-                        relocate(centerX - 30,centerY - 30 )
-                        centerX = newLocX + 30
-                        centerY = newLocY + 30
-                    }
-                }
-            }
-
-            pick.forEach { it.removeFromParent() }
-            pathList.forEach { it.removeFromParent() }
-            pathList.clear()
-            pick.clear()
-            if (this != null) {
-
-                var count = 0
-
-                while (count != 4) {
-                    val list = listOf(Pair(100,100),Pair(-100,100),Pair(100,-100),Pair(-100,-100))
-                    var signX = list[count].first
-                    var signY = list[count].second
-
-                    if (count in 0..1) {
-                        if (this.fill == Color.WHITE) signY = -signY
-                        val diagonal = allCircles
-                            .find { e -> e.contains(this.centerX + signX, this.centerY + signY) }
-                        var diagonal2 : Circle? = null
+                        if (count in 0..4) {
+                            if (current?.fill == Color.WHITE) signY = -signY
+                            val diagonal = allCircles
+                                .find { e -> e.contains(this.x + signX + 50, this.y + signY + 50) }
+                            var diagonal2: Circle? = null
                             if (diagonal != null && diagonal.fill != this.fill) {
                                 signX *= 2
                                 signY *= 2
                                 diagonal2 = allCircles
-                                    .find { e -> e.contains(this.centerX + signX, this.centerY + signY) }
+                                    .find { e -> e.contains(this.x + signX, this.y + signY) }
                             }
-                        if (diagonal?.fill != this.fill && diagonal2 == null) {
-                            pathList += pieces(this.centerX + signX, this.centerY + signY, Color.DARKBLUE)
+                            if (diagonal?.fill != this.fill && diagonal2 == null) {
+                                when (count) {
+                                    0 -> if (diagonal == null && current != null)
+                                        pathList1 = pieces(this.x + signX + 50, this.y + signY + 50, Color.DARKBLUE)
+                                    1 -> if (diagonal == null && current != null)
+                                        pathList2 = pieces(this.x + signX + 50, this.y + signY + 50, Color.DARKBLUE)
+                                    2 -> if (diagonal == null && current != null)
+                                        pathList3 = pieces(this.x + signX + 50, this.y + signY + 50, Color.DARKBLUE)
+                                    3 -> if (diagonal == null && current != null)
+                                        pathList4 = pieces(this.x + signX + 50, this.y + signY + 50, Color.DARKBLUE)
+                                }
+                            }
+                            if (pick != null) pick?.removeFromParent()
+                            if (current != null) pick = pieces(this.x + 50, this.y + 50, Color.GREEN)
                         }
-                        pick += pieces(this.centerX, this.centerY, Color.GREEN)
+                        count += 1
                     }
-                    count +=1
                 }
             }
-            pick.forEach { it.toFront() }
         }
-    }
+
+
+//            pathList.firstOrNull{
+//                val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
+//                it.contains(mousePt)
+//
+//            }.apply {
+//
+//                pathList.forEach { it.toFront() }
+//                if (this != null) {
+//                    val newLocX = this.centerX - pieceRadius
+//                    val newLocY = this.centerY - pieceRadius
+//
+//                    allCircles.find { e -> e.contains(pick.last().centerX,pick.last().centerY)  }?.apply {
+//                        centerX = newLocX
+//                        centerY = newLocY
+//                        relocate(centerX - pieceRadius,centerY - pieceRadius )
+//                        centerX = newLocX + pieceRadius
+//                        centerY = newLocY + pieceRadius
+//                    }
+//                }
+//            }
+//            pathList.forEach { it.relocate(935.0, 135.0) }
+//            pick.forEach { it.relocate(935.0, 135.0) }
+//            if (this != null) {
+//                pathList.forEach { it.relocate(935.0, 135.0) }
+//                pick.forEach { it.relocate(935.0, 135.0) }
+//                var count = 0
+//
+//                while (count != 4) {
+//                    val list = listOf(Pair(100,100),Pair(-100,100),Pair(100,-100),Pair(-100,-100))
+//                    var signX = list[count].first
+//                    var signY = list[count].second
+//
+//                    if (count in 0..1) {
+//                        if (this.fill == Color.WHITE) signY = -signY
+//                        val diagonal = allCircles
+//                            .find { e -> e.contains(this.centerX + signX, this.centerY + signY) }
+//                        var diagonal2 : Circle? = null
+//                            if (diagonal != null && diagonal.fill != this.fill) {
+//                                signX *= 2
+//                                signY *= 2
+//                                diagonal2 = allCircles
+//                                    .find { e -> e.contains(this.centerX + signX, this.centerY + signY) }
+//                            }
+//                        if (diagonal?.fill != this.fill && diagonal2 == null) {
+//                            pathList += pieces(this.centerX + signX, this.centerY + signY, Color.DARKBLUE)
+//                        }
+//                        pick += pieces(this.centerX, this.centerY, Color.GREEN)
+//                    }
+//                    count +=1
+//                }
+//            }
+//            pick.forEach { it.toFront() }
+//        }
+//        allCircles.filter { e -> e.fill == Color.WHITE }.find { k -> k.centerY == 50.0 }?.apply {
+//            this.stroke = Color.DARKBLUE
+//            this.strokeWidth = 15.0
+//        }
+//        allCircles.filter { e -> e.fill == Color.BLACK }.find { k -> k.centerY == 750.0 }?.apply {
+//            this.stroke = Color.DARKGREEN
+//            this.strokeWidth = 15.0
+//            dama.add(this)
+//        }
+//    }
+        addEventFilter(MouseEvent.MOUSE_PRESSED, ::choose)
 
         val topBoard = {
             var tile = 0
             var xCor = 0
             var yCor = 0
-            while (yCor != 800) {
+            while (yCor != 200) {
 
-                while (xCor != 800) {
+                while (xCor != 300) {
 
                     if (tile % 2 == 0) {
                         rectangle(xCor, 700 - yCor, 100.0, 100.0) {
                             fill = Paint.valueOf("#a94442")
+                            rectangle.add(this)
                         }.toBack()
-                        when (yCor != 300 || yCor != 200){
-                            (yCor < 300)-> pieces(50.0 + xCor, 750.0 - yCor, Color.WHITE)
-                            (yCor > 400)-> pieces(50.0 + xCor, 750.0 - yCor, Color.BLACK )
+                        when (yCor != 300 || yCor != 200) {
+                            (yCor < 300) -> pieces(50.0 + xCor, 750.0 - yCor, Color.WHITE)
+                            (yCor > 400) -> pieces(50.0 + xCor, 750.0 - yCor, Color.BLACK)
                         }
 
                     }
@@ -137,12 +217,10 @@ override val root = pane {
                 tile += 1
                 yCor += 100
             }
-            rectangle(0,0,800.0,800.0).toBack()
+            rectangle(0, 0, 800.0, 800.0).toBack()
         }
 
-    topBoard.invoke()
-
-    addEventFilter(MouseEvent.MOUSE_PRESSED, ::choose)
+        topBoard.invoke()
     }
 
 }
