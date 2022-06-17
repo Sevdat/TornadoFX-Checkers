@@ -44,13 +44,13 @@ class MainView : View("Russian Checkers") {
                         val substractX = pickedPiece.centerX - this.centerX
                         val substractY = pickedPiece.centerY - this.centerY
                         var g = 0
-                        val dig = abs(substractX).toInt()/ 100
-                        while (g != dig){
+                        val dig = abs(substractX).toInt() / 100
+                        while (g != dig) {
                             g += 1
-                            val diagonalX = newLocX + ((substractX/dig) * g)
-                            val diagonalY = newLocY + ((substractY/dig) * g)
+                            val diagonalX = newLocX + ((substractX / dig) * g)
+                            val diagonalY = newLocY + ((substractY / dig) * g)
                             val finder = all.find { it.contains(diagonalX, diagonalY) } as Circle?
-                            if (finder != null){
+                            if (finder != null) {
                                 allCircles += finder.apply {
                                     centerX = 850.0
                                     centerY = 150.0
@@ -108,8 +108,8 @@ class MainView : View("Russian Checkers") {
 
                                 val signX = coordinates[corCount].first * expand
                                 val signY = coordinates[corCount].second * expand
-                                location += i.apply {
 
+                                location += i.apply {
                                     this as Circle
                                     if (i != pick) {
                                         val newX = current.centerX + signX
@@ -119,8 +119,20 @@ class MainView : View("Russian Checkers") {
                                             (current.fill == Color.WHITE || current.fill == Color.BLACK)
                                         val che = checker[corCount]
                                         if (che != 2) {
-                                            if (bluePath != null) checker[corCount] += 1 else checker[corCount] = 0
+
+                                            if (bluePath != null) {
+                                                val possb = (
+                                                (current.fill == Color.BLACK && bluePath.fill != Color.DARKMAGENTA) ||
+                                                (current.fill == Color.WHITE && bluePath.fill != Color.AQUA) ||
+                                                (current.fill == Color.AQUA && bluePath.fill == Color.DARKMAGENTA) ||
+                                                (current.fill == Color.DARKMAGENTA && bluePath.fill == Color.AQUA)
+                                                        )
+                                                if (possb)
+                                                    checker[corCount] += 1 else checker[corCount] = 2
+                                            } else checker[corCount] = 0
+
                                             if (bluePath == null) {
+
                                                 if (blackOrWhite) {
                                                     when (current.fill) {
                                                         Color.WHITE -> {
@@ -140,9 +152,13 @@ class MainView : View("Russian Checkers") {
                                                     centerX = newX
                                                     centerY = newY
                                                 }
+
                                             } else {
                                                 val jump: Boolean =
                                                     (blackOrWhite && current.fill != bluePath.fill)
+                                                val jump1: Boolean =
+                                                    (current.fill == Color.BLACK && bluePath.fill != Color.DARKMAGENTA) ||
+                                                            (current.fill == Color.WHITE && bluePath.fill != Color.AQUA)
                                                 if (jump) {
                                                     val bluePath2 = all.find {
                                                         it.contains(
@@ -151,7 +167,7 @@ class MainView : View("Russian Checkers") {
                                                         )
                                                     } as Circle?
 
-                                                    if (bluePath2 == null) {
+                                                    if (bluePath2 == null && jump1) {
                                                         centerX = newX + signX
                                                         centerY = newY + signY
                                                     }
