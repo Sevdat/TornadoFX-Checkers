@@ -22,6 +22,7 @@ class MainView : View("Russian Checkers") {
         val all = allCircles.children
         val rec = rectangles.children
         val coordinates = listOf(Pair(100, 100), Pair(-100, 100), Pair(100, -100), Pair(-100, -100))
+        var chooser = 0
 
         fun choose(evt: MouseEvent) {
             val checker = mutableListOf(0, 0, 0, 0)
@@ -29,7 +30,6 @@ class MainView : View("Russian Checkers") {
                 val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
                 it.contains(mousePt)
             }.apply {
-
                 loc.firstOrNull {
                     val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
                     it.contains(mousePt)
@@ -60,6 +60,10 @@ class MainView : View("Russian Checkers") {
                         allCircles += pickedPiece.apply {
                             centerX = newLocX
                             centerY = newLocY
+                            when(chooser){
+                                0 -> chooser = 1
+                                1 -> chooser = 0
+                            }
                         }
                     }
                     for (i in all.filter { (it as Circle).centerY == 50.0 || it.centerY == 750.0 }) {
@@ -89,100 +93,103 @@ class MainView : View("Russian Checkers") {
                     relocate += 1
                 }
 
+
                 if (this != null) {
                     val pick = loc[0]
                     val current = all.find { it.contains(this.x + fifty, this.y + fifty) } as Circle?
                     var expand = 1
                     var corCount = 0
-                    for (i in loc) {
-                        if (current != null) {
-                            val gateKeeper: Boolean =
-                                (corCount == coordinates.size && current.fill != Color.BLACK &&
-                                        current.fill != Color.WHITE)
-                            if (gateKeeper) {
-                                expand += 1
-                                corCount = 0
-                            }
+                    val turn = if (chooser == 0) all.filter { (it as Circle).fill == Color.WHITE || it.fill == Color.AQUA }
+                    else all.filter { (it as Circle).fill == Color.BLACK || it.fill == Color.DARKMAGENTA}
+                    if (current in turn) {
+                        for (i in loc) {
+                            if (current != null) {
+                                val gateKeeper: Boolean =
+                                    (corCount == coordinates.size && current.fill != Color.BLACK &&
+                                            current.fill != Color.WHITE)
+                                if (gateKeeper) {
+                                    expand += 1
+                                    corCount = 0
+                                }
 
-                            if (corCount != coordinates.size) {
+                                if (corCount != coordinates.size) {
 
-                                val signX = coordinates[corCount].first * expand
-                                val signY = coordinates[corCount].second * expand
+                                    val signX = coordinates[corCount].first * expand
+                                    val signY = coordinates[corCount].second * expand
 
-                                location += i.apply {
-                                    this as Circle
-                                    if (i != pick) {
-                                        val newX = current.centerX + signX
-                                        val newY = current.centerY + signY
-                                        val bluePath = all.find { it.contains(newX, newY) } as Circle?
-                                        val blackOrWhite: Boolean =
-                                            (current.fill == Color.WHITE || current.fill == Color.BLACK)
-                                        val che = checker[corCount]
-                                        if (che != 2) {
+                                    location += i.apply {
+                                        this as Circle
+                                        if (i != pick) {
+                                            val newX = current.centerX + signX
+                                            val newY = current.centerY + signY
+                                            val bluePath = all.find { it.contains(newX, newY) } as Circle?
+                                            val blackOrWhite: Boolean =
+                                                (current.fill == Color.WHITE || current.fill == Color.BLACK)
+                                            val che = checker[corCount]
+                                            if (che != 2) {
 
-                                            if (bluePath != null) {
-                                                val possb = (
-                                                (current.fill == Color.BLACK && bluePath.fill != Color.DARKMAGENTA) ||
-                                                (current.fill == Color.WHITE && bluePath.fill != Color.AQUA) ||
-                                                (current.fill == Color.AQUA && bluePath.fill == Color.DARKMAGENTA) ||
-                                                (current.fill == Color.DARKMAGENTA && bluePath.fill == Color.AQUA)
-                                                        )
-                                                if (possb)
-                                                    checker[corCount] += 1 else checker[corCount] = 2
-                                            } else checker[corCount] = 0
+                                                if (bluePath != null) {
+                                                    val possb = (
+                                                            (current.fill == Color.BLACK && bluePath.fill != Color.DARKMAGENTA) ||
+                                                                    (current.fill == Color.WHITE && bluePath.fill != Color.AQUA) ||
+                                                                    (current.fill == Color.AQUA && bluePath.fill == Color.DARKMAGENTA) ||
+                                                                    (current.fill == Color.DARKMAGENTA && bluePath.fill == Color.AQUA)
+                                                            )
+                                                    if (possb)
+                                                        checker[corCount] += 1 else checker[corCount] = 2
+                                                } else checker[corCount] = 0
 
-                                            if (bluePath == null) {
+                                                if (bluePath == null) {
 
-                                                if (blackOrWhite) {
-                                                    when (current.fill) {
-                                                        Color.WHITE -> {
-                                                            if (corCount in 2..3) {
-                                                                centerX = newX
-                                                                centerY = newY
+                                                    if (blackOrWhite) {
+                                                        when (current.fill) {
+                                                            Color.WHITE -> {
+                                                                if (corCount in 2..3) {
+                                                                    centerX = newX
+                                                                    centerY = newY
+                                                                }
+                                                            }
+                                                            Color.BLACK -> {
+                                                                if (corCount in 0..1) {
+                                                                    centerX = newX
+                                                                    centerY = newY
+                                                                }
                                                             }
                                                         }
-                                                        Color.BLACK -> {
-                                                            if (corCount in 0..1) {
-                                                                centerX = newX
-                                                                centerY = newY
-                                                            }
-                                                        }
+                                                    } else {
+                                                        centerX = newX
+                                                        centerY = newY
                                                     }
+
                                                 } else {
-                                                    centerX = newX
-                                                    centerY = newY
-                                                }
+                                                    val jump: Boolean =
+                                                        (blackOrWhite && current.fill != bluePath.fill)
+                                                    val jump1: Boolean =
+                                                        (current.fill == Color.BLACK && bluePath.fill != Color.DARKMAGENTA) ||
+                                                                (current.fill == Color.WHITE && bluePath.fill != Color.AQUA)
+                                                    if (jump) {
+                                                        val bluePath2 = all.find {
+                                                            it.contains(
+                                                                newX + signX,
+                                                                newY + signY
+                                                            )
+                                                        } as Circle?
 
-                                            } else {
-                                                val jump: Boolean =
-                                                    (blackOrWhite && current.fill != bluePath.fill)
-                                                val jump1: Boolean =
-                                                    (current.fill == Color.BLACK && bluePath.fill != Color.DARKMAGENTA) ||
-                                                            (current.fill == Color.WHITE && bluePath.fill != Color.AQUA)
-                                                if (jump) {
-                                                    val bluePath2 = all.find {
-                                                        it.contains(
-                                                            newX + signX,
-                                                            newY + signY
-                                                        )
-                                                    } as Circle?
-
-                                                    if (bluePath2 == null && jump1) {
-                                                        centerX = newX + signX
-                                                        centerY = newY + signY
+                                                        if (bluePath2 == null && jump1) {
+                                                            centerX = newX + signX
+                                                            centerY = newY + signY
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
-                                        corCount += 1
+                                            corCount += 1
 
-                                    } else {
-                                        centerX = current.centerX
-                                        centerY = current.centerY
+                                        } else {
+                                            centerX = current.centerX
+                                            centerY = current.centerY
+                                        }
                                     }
                                 }
-
-
                             }
                         }
                     }
