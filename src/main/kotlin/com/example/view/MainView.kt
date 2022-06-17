@@ -22,6 +22,7 @@ class MainView : View("Russian Checkers") {
         val all = allCircles.children
         val rec = rectangles.children
         val coordinates = listOf(Pair(100, 100), Pair(-100, 100), Pair(100, -100), Pair(-100, -100))
+        var choose = 0
 
         fun choose(evt: MouseEvent) {
             val checker = mutableListOf(0, 0, 0, 0)
@@ -60,6 +61,11 @@ class MainView : View("Russian Checkers") {
                         allCircles += pickedPiece.apply {
                             centerX = newLocX
                             centerY = newLocY
+
+                            when (choose){
+                                0 -> choose = 1
+                                1 -> choose = 0
+                            }
                         }
                     }
                     for (i in all.filter { (it as Circle).centerY == 50.0 || it.centerY == 750.0 }) {
@@ -88,13 +94,17 @@ class MainView : View("Russian Checkers") {
                     }
                     relocate += 1
                 }
+                val turn = if (choose == 0)
+                    all.filter{(it as Circle).fill == Color.WHITE || it.fill == Color.AQUA}
+                else
+                    all.filter{(it as Circle).fill == Color.BLACK || it.fill == Color.DARKMAGENTA}
 
                 if (this != null) {
                     val pick = loc[0]
                     val current = all.find { it.contains(this.x + fifty, this.y + fifty) } as Circle?
                     var expand = 1
                     var corCount = 0
-                    for (i in loc) {
+                    if (current in turn) for (i in loc) {
                         if (current != null) {
                             val gateKeeper: Boolean =
                                 (corCount == coordinates.size && current.fill != Color.BLACK &&
