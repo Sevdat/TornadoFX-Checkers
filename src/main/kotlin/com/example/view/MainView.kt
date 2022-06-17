@@ -1,6 +1,5 @@
 package com.example.view
 
-import javafx.scene.Node
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
@@ -9,25 +8,28 @@ import javafx.scene.shape.Circle
 import javafx.scene.shape.Rectangle
 import tornadofx.*
 import kotlin.math.abs
-import kotlin.reflect.KClass
 
 
 class MainView : View("Russian Checkers") {
-// what is View
+    // what is View
     override val root: Pane = pane {
-        val rectangle = group()
+        val fifty = 50.0
+        val eightFifty = 850.0
+        val rectangles = group()
         val allCircles = group()
         val location = group()
-//        val dama = group()
-        val list = listOf(Pair(100, 100), Pair(-100, 100), Pair(100, -100), Pair(-100, -100))
-    // name better list
-    fun choose(evt: MouseEvent) {
-            rectangle.children.firstOrNull {
+        val loc = location.children
+        val all = allCircles.children
+        val rec = rectangles.children
+        val coordinates = listOf(Pair(100, 100), Pair(-100, 100), Pair(100, -100), Pair(-100, -100))
+
+        fun choose(evt: MouseEvent) {
+            val checker = mutableListOf(0, 0, 0, 0)
+            rec.firstOrNull {
                 val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
                 it.contains(mousePt)
             }.apply {
-                val loc = location.children
-                // name loc better
+
                 loc.firstOrNull {
                     val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
                     it.contains(mousePt)
@@ -36,124 +38,140 @@ class MainView : View("Russian Checkers") {
                     this as Circle?
                     if (this != null) {
                         val pick = loc[0] as Circle
-                        val pickPiece =
-                            allCircles.children.find { e -> e.contains(pick.centerX, pick.centerY) } as Circle
-                        // val current = allCircles.children.find { e -> e.contains(this.x + 50, this.y + 50) } as Circle?
+                        val pickedPiece = all.find { it.contains(pick.centerX, pick.centerY) } as Circle
                         val newLocX = this.centerX
                         val newLocY = this.centerY
-                        val substractX = pickPiece.centerX - this.centerX
-                        val substractY = pickPiece.centerY - this.centerY
-                        // when needs to be uncloned
-                        when {
-                            (abs(substractY) == 100.0 && abs(substractX) == 100.0) ->
-                                allCircles += pickPiece.apply {
-                                    centerX = newLocX
-                                    centerY = newLocY
-                                }
-                            (abs(substractY) == 200.0 && abs(substractX) == 200.0) -> {
-                                allCircles += pickPiece.apply {
-                                    centerX = newLocX
-                                    centerY = newLocY
-                                }
-
-                                val newPiece =
-                                    allCircles.children.find { e ->
-                                        e.contains(
-                                            pickPiece.centerX + (substractX / 2),
-                                            pickPiece.centerY + (substractY / 2)
-                                        )
-                                    } as Circle?
-// make numbers val and name better
-                                if (newPiece != null) {
-                                    allCircles += newPiece.apply {
-                                        centerX = 850.0
-                                        centerY = 50.0
-                                    }
+                        val substractX = pickedPiece.centerX - this.centerX
+                        val substractY = pickedPiece.centerY - this.centerY
+                        var g = 0
+                        val dig = abs(substractX).toInt()/ 100
+                        while (g != dig){
+                            g += 1
+                            val diagonalX = newLocX + ((substractX/dig) * g)
+                            val diagonalY = newLocY + ((substractY/dig) * g)
+                            val finder = all.find { it.contains(diagonalX, diagonalY) } as Circle?
+                            if (finder != null){
+                                allCircles += finder.apply {
+                                    centerX = 850.0
+                                    centerY = 150.0
                                 }
                             }
                         }
+                        allCircles += pickedPiece.apply {
+                            centerX = newLocX
+                            centerY = newLocY
+                        }
                     }
-                    // dont make clone
-                    for (i in allCircles.children){
+                    for (i in all.filter { (it as Circle).centerY == 50.0 || it.centerY == 750.0 }) {
                         i as Circle
-                        when{
-                            (i.fill == Color.WHITE && i.centerY == 50.0) ->{
+                        val beDama: Boolean =
+                            (i.fill == Color.WHITE && i.centerY == 50.0) ||
+                                    (i.fill == Color.BLACK && i.centerY == 750.0)
+                        when {
+                            beDama -> {
                                 allCircles += i.apply {
-                                    fill = Color.AQUA
-                                    strokeWidth = 8.0
-                                }
-                            }
-                            (i.fill == Color.BLACK && i.centerY == 750.0) ->{
-                                allCircles += i.apply {
-                                    fill = Color.DARKMAGENTA
+                                    fill = if (i.centerY == 50.0) Color.AQUA else Color.DARKMAGENTA
                                     strokeWidth = 8.0
                                 }
                             }
                         }
                     }
                 }
-            // name cou better and numbers val
-                var cou = 0
+
+                var relocate = 0
                 this as Rectangle?
-                while (cou != loc.size - 1) {
-                    location += loc[cou].apply {
+                while (relocate != loc.size - 1) {
+                    location += loc[relocate].apply {
                         this as Circle
-                        centerX = 850.0
-                        centerY = 50.0
+                        centerX = eightFifty
+                        centerY = fifty
                     }
-                    cou += 1
+                    relocate += 1
                 }
 
                 if (this != null) {
-                    val current = allCircles.children.find { e -> e.contains(this.x + 50, this.y + 50) } as Circle?
-                    var count = 0
-                    while (count != 4) {
-                        var signX = list[count].first
-                        var signY = list[count].second
-                        if (count in 0..4) {
-                           if (current?.fill != Color.AQUA || current?.fill != Color.DARKMAGENTA) {
-                            if (current?.fill == Color.WHITE) signY = -signY
-                            val diagonal = allCircles.children
-                                .find { e -> e.contains(this.x + signX + 50, this.y + signY + 50) } as Circle?
-                            var diagonal2: Circle? = null
-                            if (diagonal != null && diagonal.fill != current?.fill) {
-                                signX *= 2
-                                signY *= 2
-                                diagonal2 = allCircles.children
-                                    .find { e -> e.contains(this.x + signX + 50, this.y + signY + 50) } as Circle?
-                            }
-                            if (diagonal?.fill != current?.fill && diagonal2 == null && current != null)
-                                location += loc[count + 1].apply {
-                                    this as Circle
-                                    centerX = current.centerX + signX
-                                    centerY = current.centerY + signY
-                                }
-                        }
-                            if (current != null) {
-                                var count2 = 0
-                                if (current.fill == Color.AQUA || current.fill == Color.DARKMAGENTA)
-                                    while(count2 != 4 ){
-                                        location += loc[count2 + count*2 + 1].apply {
-                                            this as Circle
-                                            centerX = current.centerX + signX*(count2 + count*2)
-                                            centerY = current.centerY + signY*(count2 + count*2)
-                                        }
-                                        count2 += 1
-                                    }
+                    val pick = loc[0]
+                    val current = all.find { it.contains(this.x + fifty, this.y + fifty) } as Circle?
+                    var expand = 1
+                    var corCount = 0
+                    for (i in loc) {
+                        if (current != null) {
+                            val gateKeeper: Boolean =
+                                (corCount == coordinates.size && current.fill != Color.BLACK &&
+                                        current.fill != Color.WHITE)
+                            if (gateKeeper) {
+                                expand += 1
+                                corCount = 0
                             }
 
-                        }
-                        if (current != null && count == 0)
-                            location += loc[count].apply {
-                                this as Circle
-                                centerX = current.centerX
-                                centerY = current.centerY
+                            if (corCount != coordinates.size) {
+
+                                val signX = coordinates[corCount].first * expand
+                                val signY = coordinates[corCount].second * expand
+                                location += i.apply {
+
+                                    this as Circle
+                                    if (i != pick) {
+                                        val newX = current.centerX + signX
+                                        val newY = current.centerY + signY
+                                        val bluePath = all.find { it.contains(newX, newY) } as Circle?
+                                        val blackOrWhite: Boolean =
+                                            (current.fill == Color.WHITE || current.fill == Color.BLACK)
+                                        val che = checker[corCount]
+                                        if (che != 2) {
+                                            if (bluePath != null) checker[corCount] += 1 else checker[corCount] = 0
+                                            if (bluePath == null) {
+                                                if (blackOrWhite) {
+                                                    when (current.fill) {
+                                                        Color.WHITE -> {
+                                                            if (corCount in 2..3) {
+                                                                centerX = newX
+                                                                centerY = newY
+                                                            }
+                                                        }
+                                                        Color.BLACK -> {
+                                                            if (corCount in 0..1) {
+                                                                centerX = newX
+                                                                centerY = newY
+                                                            }
+                                                        }
+                                                    }
+                                                } else {
+                                                    centerX = newX
+                                                    centerY = newY
+                                                }
+                                            } else {
+                                                val jump: Boolean =
+                                                    (blackOrWhite && current.fill != bluePath.fill)
+                                                if (jump) {
+                                                    val bluePath2 = all.find {
+                                                        it.contains(
+                                                            newX + signX,
+                                                            newY + signY
+                                                        )
+                                                    } as Circle?
+
+                                                    if (bluePath2 == null) {
+                                                        centerX = newX + signX
+                                                        centerY = newY + signY
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        corCount += 1
+
+                                    } else {
+                                        centerX = current.centerX
+                                        centerY = current.centerY
+                                    }
+                                }
+
+
                             }
-                        count += 1
+                        }
                     }
                 }
             }
-
         }
         addEventFilter(MouseEvent.MOUSE_PRESSED, ::choose)
 
@@ -161,33 +179,18 @@ class MainView : View("Russian Checkers") {
             return circle(startX, startY) {
                 fill = f
                 when (f) {
-                    Color.BLACK -> {
+                    Color.BLACK, Color.WHITE, Color.GREEN, Color.DARKBLUE -> {
                         run {
-                            radius = 30.0
-                            stroke = Color.WHITE
-                            strokeWidth = 3.0
+                            if (this.fill == Color.BLACK || this.fill == Color.WHITE) {
+                                radius = 30.0
+                                stroke = if (this.fill == Color.BLACK) Color.WHITE else Color.BLACK
+                                strokeWidth = 3.0
+                                allCircles.children.add(this)
+                            } else {
+                                radius = 15.0
+                                location.children.add(this)
+                            }
                         }
-                        allCircles.children.add(this)
-                    }
-                    Color.WHITE -> {
-                        run {
-                            radius = 30.0
-                            stroke = Color.BLACK
-                            strokeWidth = 3.0
-                        }
-                        allCircles.children.add(this)
-                    }
-                    Color.GREEN -> {
-                        run {
-                            radius = 15.0
-                        }
-                        location.children.add(this)
-                    }
-                    Color.DARKBLUE -> {
-                        run {
-                            radius = 15.0
-                        }
-                        location.children.add(this)
                     }
                 }
             }
@@ -204,7 +207,7 @@ class MainView : View("Russian Checkers") {
                     if (tile % 2 == 0) {
                         rectangle(xCor, 700 - yCor, 100.0, 100.0) {
                             fill = Paint.valueOf("#a94442")
-                            rectangle.add(this)
+                            rectangles.add(this)
                         }.toBack()
                         when (yCor != 300 || yCor != 200) {
                             (yCor < 300) -> pieces(50.0 + xCor, 750.0 - yCor, Color.WHITE)
@@ -219,6 +222,8 @@ class MainView : View("Russian Checkers") {
                 if (yCor == 0) pieces(850.0, 50.0, Color.GREEN)
                 pieces(850.0, 50.0, Color.DARKBLUE)
                 pieces(850.0, 50.0, Color.DARKBLUE)
+                pieces(850.0, 50.0, Color.DARKBLUE)
+                pieces(850.0, 50.0, Color.DARKBLUE)
                 xCor = 0
                 tile += 1
                 yCor += 100
@@ -229,6 +234,66 @@ class MainView : View("Russian Checkers") {
     }
 
 }
+//                                val newPiece = allCircles.children.find {
+//                                    it.contains(
+//                                        pickedPiece.centerX + (substractX / 2),
+//                                        pickedPiece.centerY + (substractY / 2)
+//                                    )
+//                                } as Circle?
+//                                // make numbers val and name better
+//                                if (newPiece != null) {
+//                                    allCircles += newPiece.apply {
+//                                        centerX = 850.0
+//                                        centerY = 150.0
+//                                    }
+//                                }
+
+// println(allCircles.children.filter { e -> (e as Circle).fill == Color.AQUA || e.fill == Color.DARKMAGENTA }.size)
+
+//                    while (count != 4) {
+//                        var signX = list[count].first
+//                        var signY = list[count].second
+//                        if (count in 0..4) {
+//
+//                            if (current?.fill != Color.AQUA || current?.fill != Color.DARKMAGENTA) {
+//                                if (current?.fill == Color.WHITE) signY = -signY
+//                                val diagonal = all.find { it.contains(this.x + signX + 50, this.y + signY + 50) } as Circle?
+//                                var diagonal2: Circle? = null
+//                                if (diagonal != null && diagonal.fill != current?.fill) {
+//                                    signX *= 2
+//                                    signY *= 2
+//                                    diagonal2 = all.find { it.contains(this.x + signX + 50, this.y + signY + 50) } as Circle?
+//                                }
+//                                if (diagonal?.fill != current?.fill && diagonal2 == null && current != null)
+//                                    location += loc[count + 1].apply {
+//                                        this as Circle
+//                                        centerX = current.centerX + signX
+//                                        centerY = current.centerY + signY
+//                                    }
+//                            }
+//
+//                            if (current != null && count != 0) {
+//                                var count2 = 0
+//                                if (current.fill == Color.AQUA || current.fill == Color.DARKMAGENTA)
+//                                    while (count2 != 4) {
+//                                        location += loc[count2 + count * 2].apply {
+//                                            this as Circle
+//                                            centerX = current.centerX + signX * (count2 + count * 2)
+//                                            centerY = current.centerY + signY * (count2 + count * 2)
+//                                        }
+//                                        count2 += 1
+//                                    }
+//                            }
+//
+//                        }
+//                        if (current != null && count == 0)
+//                            location += loc[count].apply {
+//                                this as Circle
+//                                centerX = current.centerX
+//                                centerY = current.centerY
+//                            }
+//                        count += 1
+//                    }
 
 //            pathList.firstOrNull{
 //                val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
