@@ -50,6 +50,7 @@ class MainView : View("Russian Checkers") {
                             g += 1
                             val diagonalX = newLocX + ((substractX / dig) * g)
                             val diagonalY = newLocY + ((substractY / dig) * g)
+
                             val finder = all.find { it.contains(diagonalX, diagonalY) } as Circle?
                             if (finder != null) {
                                 allCircles += finder.apply {
@@ -61,8 +62,7 @@ class MainView : View("Russian Checkers") {
                         allCircles += pickedPiece.apply {
                             centerX = newLocX
                             centerY = newLocY
-
-                            when (choose){
+                            when (choose) {
                                 0 -> choose = 1
                                 1 -> choose = 0
                             }
@@ -94,10 +94,11 @@ class MainView : View("Russian Checkers") {
                     }
                     relocate += 1
                 }
+
                 val turn = if (choose == 0)
-                    all.filter{(it as Circle).fill == Color.WHITE || it.fill == Color.AQUA}
+                    all.filter { (it as Circle).fill == Color.WHITE || it.fill == Color.AQUA }
                 else
-                    all.filter{(it as Circle).fill == Color.BLACK || it.fill == Color.DARKMAGENTA}
+                    all.filter { (it as Circle).fill == Color.BLACK || it.fill == Color.DARKMAGENTA }
 
                 if (this != null) {
                     val pick = loc[0]
@@ -133,12 +134,12 @@ class MainView : View("Russian Checkers") {
 
                                             if (bluePath != null) {
                                                 val possb = (
-                                                (current.fill == Color.BLACK && bluePath.fill != Color.DARKMAGENTA) ||
-                                                (current.fill == Color.WHITE && bluePath.fill != Color.AQUA) ||
-                                                (current.fill == Color.AQUA && bluePath.fill == Color.DARKMAGENTA) ||
-                                                (current.fill == Color.DARKMAGENTA && bluePath.fill == Color.AQUA) ||
-                                                (current.fill == Color.DARKMAGENTA && bluePath.fill == Color.WHITE)||
-                                                (current.fill == Color.AQUA && bluePath.fill == Color.BLACK)
+                                                        (current.fill == Color.BLACK && bluePath.fill != Color.DARKMAGENTA) ||
+                                                                (current.fill == Color.WHITE && bluePath.fill != Color.AQUA) ||
+                                                                (current.fill == Color.AQUA && bluePath.fill == Color.DARKMAGENTA) ||
+                                                                (current.fill == Color.DARKMAGENTA && bluePath.fill == Color.AQUA) ||
+                                                                (current.fill == Color.DARKMAGENTA && bluePath.fill == Color.WHITE) ||
+                                                                (current.fill == Color.AQUA && bluePath.fill == Color.BLACK)
                                                         )
                                                 if (possb)
                                                     checker[corCount] += 1 else checker[corCount] = 2
@@ -148,14 +149,11 @@ class MainView : View("Russian Checkers") {
 
                                                 if (blackOrWhite) {
                                                     when (current.fill) {
-                                                        Color.WHITE -> {
-                                                            if (corCount in 2..3) {
-                                                                centerX = newX
-                                                                centerY = newY
-                                                            }
-                                                        }
-                                                        Color.BLACK -> {
-                                                            if (corCount in 0..1) {
+                                                        Color.WHITE, Color.BLACK -> {
+                                                            val initial =
+                                                                (current.fill == Color.WHITE && corCount in 2..3 ||
+                                                                        current.fill == Color.BLACK && corCount in 0..1)
+                                                            if (initial) {
                                                                 centerX = newX
                                                                 centerY = newY
                                                             }
@@ -261,6 +259,24 @@ class MainView : View("Russian Checkers") {
     }
 
 }
+//                        var k = 0
+//                        var finder2: Circle? = null
+//                        while (k != 2) {
+//                            k += 1
+//                            for (i in coordinates) {
+//                            val drx = pickedPiece.centerX + (i.first * k)
+//                            val dry = pickedPiece.centerY + (i.second * k)
+//
+//                            finder2 = all.find { it.contains(drx, dry) } as Circle?
+//
+//
+//                            when (choose) {
+//                                0 -> if (g > 1) choose = 1
+//                                1 -> if (g > 1) choose = 0
+//                            }
+//                        }
+//                        }
+
 //                                val newPiece = allCircles.children.find {
 //                                    it.contains(
 //                                        pickedPiece.centerX + (substractX / 2),
