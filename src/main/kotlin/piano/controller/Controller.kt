@@ -5,6 +5,7 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
 import piano.model.Keys
 import piano.model.loadInstrument
+import java.io.File
 import javax.sound.midi.MidiChannel
 import javax.sound.midi.MidiSystem
 import javax.sound.midi.Synthesizer
@@ -85,7 +86,9 @@ fun save(name:String) {
 
         libraryMap += mapOf(namedSong.last() to num)
         notePair = listOf()
-        println(libraryMap)
+        val fileName = "src/main/kotlin/piano/file/${name}.txt"
+        File(fileName).createNewFile()
+        File(fileName).writeText(libraryMap.toString())
 
 }
 
