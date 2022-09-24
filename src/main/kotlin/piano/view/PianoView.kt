@@ -50,11 +50,9 @@ class PianoView : View("Piano") {
                             now = System.currentTimeMillis()
                         }
                         stop -> setOnAction {
-                            SaveSong().openWindow()
                             startRecord = false
                             if (notePair.isNotEmpty()){
-                                libraryList += listOf(notePair)
-                                notePair = listOf()
+                                SaveSong().openWindow()
                             }
                         }
                         library -> setOnAction { SongLibrary().openWindow() }
@@ -84,16 +82,31 @@ class SaveSong : View("Save") {
                     this.width = 300.0
                     this.height = 300.0
                 }
+
                 vbox {
                     fieldset("Song Name") {
                         val s = textfield().characters
+                        var once = false
                         button("Save and Close").setOnAction {
-                            namedSong +=  "$s"
-                            close()
+                            val name = "$s"
+                            when{
+                                namedSong.contains(name) ->{
+                                 if (!once) {
+                                     fieldset("Error: Name Already Exists")
+                                     once = true
+                                 }
+                                }
+                                else -> {
+                                    save(name)
+                                    println(libraryMap)
+                                    close()
+                                }
+                            }
                         }
                     }
                 }
             }
+
         }
     }
 }
@@ -103,16 +116,21 @@ class SongLibrary : View("Library") {
 
     override val root = pane()
     init {
-        flowpane {
-            for ((i,e) in libraryList.withIndex()){
+           val open = button("Open Song Library")
 
-                button("$i") {
-                    setOnAction { libraryPlay(i) }
+           open.setOnAction {
+                currentWindow?.apply {
+                    this.width = 300.0
+                    this.height = 300.0
                 }
+               vbox {
 
+                   for ((i,e) in libraryList.withIndex()){
+                       button(namedSong[i]) {
+                           setOnAction { libraryPlay(i) }
+                       }
+                   }
+               }
             }
-
-        }
-
     }
 }

@@ -24,6 +24,7 @@ var pianoKeys = listOf<Rectangle>()
 var coordinateKeys = listOf<Keys>()
 var namedSong = listOf<String>()
 var libraryList = listOf<List<Pair<Long,Rectangle>>>()
+var libraryMap = mapOf<String,List<Pair<Long,Rectangle>>>()
 
 var amountOfKeySets = 3
 const val intensity = 60
@@ -63,14 +64,17 @@ fun keySetup(amount: Int){
                 }
                 coordinateKeys += empty
         }
-        println(coordinateKeys)
 }
 
 fun chooseKey(rec: Rectangle?){
         val indexOfPianoKey = pianoKeys.withIndex().first { (_,e) -> e == rec }.index
         loadInstrument(indexOfPianoKey + intensity, volume)
 }
-
+fun save(name:String) {
+        namedSong +=  name
+        libraryList += listOf(notePair)
+        libraryMap += mapOf(namedSong.last() to libraryList.last())
+}
 fun playKey(evt: MouseEvent) {
         val containList = pianoKeys.filter {
                 val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
