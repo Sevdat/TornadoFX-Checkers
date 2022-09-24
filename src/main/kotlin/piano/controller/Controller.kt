@@ -20,18 +20,18 @@ import javax.sound.midi.Synthesizer
 //        .first { item == it.value }
 //
 //        .index
-var amountOfKeySets = 3
 var pianoKeys = listOf<Rectangle>()
 var coordinateKeys = listOf<Keys>()
-lateinit var instrumentPlayer: MidiChannel
-val instrumentLoader: Synthesizer = MidiSystem.getSynthesizer()
+var namedSong = listOf<String>()
+var libraryList = listOf<List<Pair<Long,Rectangle>>>()
+
+var amountOfKeySets = 3
 const val intensity = 60
 const val volume = 60
 var startRecord = false
 var notePair = listOf<Pair<Long,Rectangle>>()
 // music buffer notepair. two public method push and getall
 var now:Long = 0
-var libraryList = listOf<List<Pair<Long,Rectangle>>>()
 
 fun keySetup(amount: Int){
         if (amount != 0) {

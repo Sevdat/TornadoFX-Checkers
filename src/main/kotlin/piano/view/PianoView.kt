@@ -1,9 +1,11 @@
 package piano.view
 
 import javafx.scene.input.MouseEvent
+import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
 import piano.controller.*
+import piano.model.instrumentLoader
 import tornadofx.*
 
 class PianoView : View("Piano") {
@@ -48,6 +50,7 @@ class PianoView : View("Piano") {
                             now = System.currentTimeMillis()
                         }
                         stop -> setOnAction {
+                            SaveSong().openWindow()
                             startRecord = false
                             if (notePair.isNotEmpty()){
                                 libraryList += listOf(notePair)
@@ -55,6 +58,39 @@ class PianoView : View("Piano") {
                             }
                         }
                         library -> setOnAction { SongLibrary().openWindow() }
+                    }
+                }
+            }
+        }
+    }
+}
+
+class SaveSong : View("Save") {
+
+    override val root = pane()
+    init {
+        form {
+            val save = button("Save")
+            val dontSave = button("Don't Save")
+
+            dontSave.setOnAction {
+                close()
+            }
+
+            save.setOnAction {
+                dontSave.isVisible = false
+                save.isVisible = false
+                currentWindow?.apply {
+                    this.width = 300.0
+                    this.height = 300.0
+                }
+                vbox {
+                    fieldset("Song Name") {
+                        val s = textfield().characters
+                        button("Save and Close").setOnAction {
+                            namedSong +=  "$s"
+                            close()
+                        }
                     }
                 }
             }
