@@ -23,7 +23,6 @@ class PianoView : View("Piano") {
                         id = e.keyName
                     }
                 }
-                println(pianoKeys[i].id)
             }
             root.getChildList()?.addAll(pianoKeys)
             for (i in root.getChildList()!!.filter { i -> (i as Rectangle).fill == Color.BLACK }) {
@@ -90,7 +89,7 @@ class SaveSong : View("Save") {
                         button("Save and Close").setOnAction {
                             val name = "$s"
                             when{
-                                namedSong.contains(name) ->{
+                                namedSong.contains(name) -> {
                                  if (!once) {
                                      fieldset("Error: Name Already Exists")
                                      once = true
@@ -98,7 +97,6 @@ class SaveSong : View("Save") {
                                 }
                                 else -> {
                                     save(name)
-                                    println(libraryMap)
                                     close()
                                 }
                             }
@@ -116,18 +114,16 @@ class SongLibrary : View("Library") {
 
     override val root = pane()
     init {
-           val open = button("Open Song Library")
-
-           open.setOnAction {
-                currentWindow?.apply {
-                    this.width = 300.0
-                    this.height = 300.0
-                }
                vbox {
-
-                   for ((i,e) in libraryList.withIndex()){
-                       button(namedSong[i]) {
-                           setOnAction { libraryPlay(i) }
+                   val open = button("Open Song Library")
+                   open.setOnAction {
+                       currentWindow?.apply {
+                           this.width = 300.0
+                           this.height = 300.0
+                       }
+                   for (i in libraryMap){
+                       button(i.key) {
+                           setOnAction { libraryPlay(i.key) }
                        }
                    }
                }

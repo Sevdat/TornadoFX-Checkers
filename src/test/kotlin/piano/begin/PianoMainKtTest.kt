@@ -15,7 +15,7 @@ class PianoTest: TestCase(){
         }
         libraryList += listOf(notePair)
         loadInstrument(60,60)
-        libraryPlay(libraryList.size - 1)
+//        libraryPlay(libraryList.size - 1)
     }
     // control many sounds, check keys if it is the right press
     fun test(){

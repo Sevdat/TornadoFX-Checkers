@@ -24,7 +24,7 @@ var pianoKeys = listOf<Rectangle>()
 var coordinateKeys = listOf<Keys>()
 var namedSong = listOf<String>()
 var libraryList = listOf<List<Pair<Long,Rectangle>>>()
-var libraryMap = mapOf<String,List<Pair<Long,Rectangle>>>()
+var libraryMap = mapOf<String,List<Pair<Long,String>>>()
 
 var amountOfKeySets = 3
 const val intensity = 60
@@ -73,8 +73,22 @@ fun chooseKey(rec: Rectangle?){
 fun save(name:String) {
         namedSong +=  name
         libraryList += listOf(notePair)
-        libraryMap += mapOf(namedSong.last() to libraryList.last())
+
+        var num = listOf<Pair<Long,String>>()
+        var newLong: Long = 0
+        val last = libraryList.last()
+        for ((i,e) in last.withIndex()){
+                newLong = if (i == 0) e.first else e.first - last[i -1].first
+
+                num += Pair(newLong, e.second.id.toString())
+        }
+
+        libraryMap += mapOf(namedSong.last() to num)
+        notePair = listOf()
+        println(libraryMap)
+
 }
+
 fun playKey(evt: MouseEvent) {
         val containList = pianoKeys.filter {
                 val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
@@ -94,17 +108,14 @@ fun playKey(evt: MouseEvent) {
 
 var longCheck = listOf<Long>()
 var timeCheck = listOf<Long>()
-fun libraryPlay(f:Int){
-        for ((i,e) in libraryList[f].withIndex()){
+fun libraryPlay(f:String){
+        for ((i,e) in libraryMap[f]!!){
                 var nowNow: Long = 0
                 now = System.currentTimeMillis()
-                val timeGap: Long = if (i == 0) e.first else e.first - libraryList[f][i-1].first
-                while (nowNow <= timeGap) {
-                        nowNow = System.currentTimeMillis() - now
-                }
-                chooseKey(e.second)
+                while (nowNow <= i) nowNow = System.currentTimeMillis() - now
+                val rectt = pianoKeys[e.toInt()]
+                chooseKey(rectt)
                 longCheck += nowNow
-                timeCheck += timeGap
         }
 }
 
