@@ -3,7 +3,6 @@ package piano.view
 import javafx.scene.input.MouseEvent
 import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
-import org.w3c.dom.css.Rect
 import piano.controller.*
 import tornadofx.*
 
@@ -12,10 +11,10 @@ class PianoView : View("Piano") {
     init {
         instrumentLoader.open()
         with(root){
-            keySetup(1)
+            keySetup(amountOfKeySets)
             for ((i,e) in coordinateKeys.withIndex()){
                 pianoKeys += Rectangle(e.x,e.y,e.keyWidth,e.keyHeight).apply {
-                    if (i % 2 == 0) {
+                    if (e.keyHeight != 75.0) {
                         id = e.keyName
                         fill = e.color
                     } else {
@@ -30,7 +29,6 @@ class PianoView : View("Piano") {
             }
             addEventFilter(MouseEvent.MOUSE_PRESSED, ::playKey)
         }
-        // data class
         vbox {
             for (i in 0..2){
                 var name = ""

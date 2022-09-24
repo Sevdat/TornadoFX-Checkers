@@ -20,6 +20,7 @@ import javax.sound.midi.Synthesizer
 //        .first { item == it.value }
 //
 //        .index
+var amountOfKeySets = 3
 var pianoKeys = listOf<Rectangle>()
 var coordinateKeys = listOf<Keys>()
 lateinit var instrumentPlayer: MidiChannel
@@ -33,21 +34,36 @@ var now:Long = 0
 var libraryList = listOf<List<Pair<Long,Rectangle>>>()
 
 fun keySetup(amount: Int){
-        var x = 98.0
-        val y = 0.0
-        val keyWidth = 50.0
-        for (i in 0..12){
-                var keyHeight = 150.0
-                var paint: Color = Color.BLUE
-                if (i % 2 != 0){
-                        keyHeight = 75.0
-                        paint = Color.BLACK
+        if (amount != 0) {
+                var x = 98.0
+                val y = 0.0
+                val keyWidth = 50.0
+                for (i in 0..12) {
+                        var keyHeight = 150.0
+                        var paint: Color = Color.BLUE
+                        if (i % 2 != 0) {
+                                keyHeight = 75.0
+                                paint = Color.BLACK
+                        }
+                        val keyNumber = if (i in 5..12) i - 1 else i
+                        if (i != 5) coordinateKeys +=
+                                Keys("$keyNumber", x + i * (keyWidth / 2), y, keyWidth, keyHeight, paint)
+                        x += 2.0
                 }
-                coordinateKeys +=
-                        Keys("${amount * i}",x + i*(keyWidth/2),y,keyWidth,keyHeight, paint)
-                x += 2.0
+                var cycle = 1
+                var empty = listOf<Keys>()
+                while (cycle != amount) {
+                        for ((i,e) in coordinateKeys.withIndex()) {
+                               empty += e.copy().apply {
+                                       this.x += 378*cycle
+                                       this.keyName = "${i + 12*cycle}"
+                               }
+                        }
+                        cycle += 1
+                }
+                coordinateKeys += empty
         }
-
+        println(coordinateKeys)
 }
 
 fun chooseKey(rec: Rectangle?){
@@ -56,16 +72,13 @@ fun chooseKey(rec: Rectangle?){
 }
 
 fun playKey(evt: MouseEvent) {
-        println(pianoKeys.filter {
+        val containList = pianoKeys.filter {
                 val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
                 it.contains(mousePt)
         }
-        )
-        pianoKeys.firstOrNull {
-                val mousePt = it.screenToLocal(evt.screenX, evt.screenY)
-                it.contains(mousePt)
-        }.apply {
-                if (this != null) {
+        if (containList.isNotEmpty()) {
+                val option = containList.find { it.fill == Color.BLACK } ?: containList.first()
+                option.apply {
                         chooseKey(this)
                         if (startRecord == true) {
                                 val nowHappening = System.currentTimeMillis() - now
