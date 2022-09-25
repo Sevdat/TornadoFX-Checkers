@@ -12,6 +12,7 @@ class PianoView : View("Piano") {
     override val root = pane()
     init {
         instrumentLoader.open()
+        getLibrary()
         with(root){
             keySetup(amountOfKeySets)
             for ((i,e) in coordinateKeys.withIndex()){

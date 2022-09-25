@@ -6,6 +6,7 @@ import javafx.scene.shape.Rectangle
 import piano.model.Keys
 import piano.model.loadInstrument
 import java.io.File
+import java.io.FileWriter
 import javax.sound.midi.MidiChannel
 import javax.sound.midi.MidiSystem
 import javax.sound.midi.Synthesizer
@@ -21,6 +22,7 @@ import javax.sound.midi.Synthesizer
 //        .first { item == it.value }
 //
 //        .index
+var notePair = listOf<Pair<Long,Rectangle>>()
 var pianoKeys = listOf<Rectangle>()
 var coordinateKeys = listOf<Keys>()
 var namedSong = listOf<String>()
@@ -31,9 +33,9 @@ var amountOfKeySets = 3
 const val intensity = 60
 const val volume = 60
 var startRecord = false
-var notePair = listOf<Pair<Long,Rectangle>>()
-// music buffer notepair. two public method push and getall
+val fileName = "src/main/kotlin/piano/file/PianoSongLibrary.txt"
 var now:Long = 0
+// music buffer notepair. two public method push and getall
 
 fun keySetup(amount: Int){
         if (amount != 0) {
@@ -86,10 +88,29 @@ fun save(name:String) {
 
         libraryMap += mapOf(namedSong.last() to num)
         notePair = listOf()
-        val fileName = "src/main/kotlin/piano/file/${name}.txt"
-        File(fileName).createNewFile()
-        File(fileName).writeText(libraryMap.toString())
+        saveToFile(namedSong.last())
 
+}
+ fun saveToFile(name:String){
+         val string = "$name ${libraryMap[name]}\n"
+        FileWriter(fileName,true).use { out -> out.write(string) }
+ }
+fun getLibrary(){
+        val fil = File(fileName).readLines()
+        if(fil.isNotEmpty()) {
+                for (i in fil) {
+                        val k = i.replace(Regex("""[] ]"""), "").split("[")
+                        val name = k[0]
+                        val pair = k[1].split(Regex("""[(), ]""")).filter { it != "" }
+                        var pairList = listOf<Pair<Long,String>>()
+                        var pairCount = 0
+                        while (pairCount < pair.size - 1){
+                                pairList += Pair(pair[pairCount].toLong(),pair[pairCount + 1])
+                                pairCount += 2
+                        }
+                        libraryMap += mapOf(name to pairList)
+                }
+        }
 }
 
 fun playKey(evt: MouseEvent) {
