@@ -1,32 +1,58 @@
 package piano.begin
 
+import javafx.scene.paint.Paint
 import javafx.scene.shape.Rectangle
 import junit.framework.TestCase
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
 import piano.controller.*
-import piano.model.loadInstrument
+import piano.view.rectangleSetUp
+import java.io.File
 
 class PianoTest: TestCase(){
+    val keyAmount = 3
     init {
-        keySetup(0)
-        for ((i,e) in pianoKeys.withIndex()){
-            notePair += Pair(100 + i*4L , e)
-        }
-        libraryList += listOf(notePair)
-        loadInstrument(60,60)
-//        libraryPlay(libraryList.size - 1)
+        fileName = "src/test/kotlin/piano/begin/PianoTest.txt"
+        File(fileName).createNewFile()
+        File(fileName).writeText(
+            "ef [(570, 0), (604, 1), (607, 2)]\n" +
+                "fe [(1816, 0), (584, 4), (539, 2)]\n" +
+                "asdd [(671, 0), (534, 2), (534, 1)]\n" +
+                "fasdd [(670, 0), (1070, 2), (570, 4), (535, 5), (569, 3), (605, 1), (709, 5), (685, 6)]\n" +
+                "asdd ddd [(887, 0), (550, 2), (542, 4), (528, 3)]\n"
+        )
+        keySetup(keyAmount)
+        rectangleSetUp()
+        getLibrary(fileName)
+        libraryPlay(libraryMap.keys.first())
+        notePair = listOf(
+            Pair(680L, Rectangle(98.0, 0.0, 50.0, 150.0).apply {
+                id = "0"
+                fill = Paint.valueOf("0x0000ffff")
+            })
+        )
     }
-    // control many sounds, check keys if it is the right press
     fun test(){
-        assertEquals(true, libraryList[0].size == notePair.size)
-        var x = 0
-        while (x != libraryList[0].size - 1){
-            assertEquals(true, longCheck[x] - timeCheck[x] in 0..3 )
-            x+=1
+        assertEquals(keyAmount*12, pianoKeys.size)
+        assertEquals(
+            "[(570, 0), (604, 1), (607, 2)]",
+            libraryMap["ef"].toString()
+        )
+        assertEquals(
+            "[(670, 0), (1070, 2), (570, 4), (535, 5), (569, 3), (605, 1), (709, 5), (685, 6)]",
+            libraryMap["fasdd"].toString()
+        )
+        run{
+            save("kek")
+            assertEquals(
+                "ef [(570, 0), (604, 1), (607, 2)]\n" +
+                        "fe [(1816, 0), (584, 4), (539, 2)]\n" +
+                        "asdd [(671, 0), (534, 2), (534, 1)]\n" +
+                        "fasdd [(670, 0), (1070, 2), (570, 4), (535, 5), (569, 3), (605, 1), (709, 5), (685, 6)]\n" +
+                        "asdd ddd [(887, 0), (550, 2), (542, 4), (528, 3)]\n" +
+                        "kek [(680, 0)]\n",
+                File(fileName).readText()
+            )
         }
     }
-
 }
 
 //FileChooser + сохранение в ФС

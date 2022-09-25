@@ -33,7 +33,7 @@ var amountOfKeySets = 3
 const val intensity = 60
 const val volume = 60
 var startRecord = false
-val fileName = "src/main/kotlin/piano/file/PianoSongLibrary.txt"
+var fileName = "src/main/kotlin/piano/file/PianoSongLibrary.txt"
 var now:Long = 0
 // music buffer notepair. two public method push and getall
 
@@ -95,9 +95,9 @@ fun save(name:String) {
          val string = "$name ${libraryMap[name]}\n"
         FileWriter(fileName,true).use { out -> out.write(string) }
  }
-fun getLibrary(){
-        val fil = File(fileName).readLines()
-        if(fil.isNotEmpty()) {
+fun getLibrary(fileName:String){
+        if (File(fileName).exists() && File(fileName).length() != 0L){
+                val fil = File(fileName).readLines()
                 for (i in fil) {
                         val k = i.replace(Regex("""[] ]"""), "").split("[")
                         val name = k[0]
@@ -110,6 +110,7 @@ fun getLibrary(){
                         }
                         libraryMap += mapOf(name to pairList)
                 }
+
         }
 }
 
@@ -137,8 +138,7 @@ fun libraryPlay(f:String){
                 var nowNow: Long = 0
                 now = System.currentTimeMillis()
                 while (nowNow <= i) nowNow = System.currentTimeMillis() - now
-                val rectt = pianoKeys[e.toInt()]
-                chooseKey(rectt)
+                chooseKey(pianoKeys[e.toInt()])
                 longCheck += nowNow
         }
 }

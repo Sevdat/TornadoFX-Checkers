@@ -1,30 +1,32 @@
 package piano.view
 
 import javafx.scene.input.MouseEvent
-import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
 import piano.controller.*
 import piano.model.instrumentLoader
 import tornadofx.*
 
+fun rectangleSetUp(){
+    for ((i,e) in coordinateKeys.withIndex()){
+        pianoKeys += Rectangle(e.x,e.y,e.keyWidth,e.keyHeight).apply {
+            if (e.keyHeight != 75.0) {
+                id = e.keyName
+                fill = e.color
+            } else {
+                id = e.keyName
+            }
+        }
+    }
+}
 class PianoView : View("Piano") {
     override val root = pane()
     init {
         instrumentLoader.open()
-        getLibrary()
+        getLibrary(fileName)
         with(root){
             keySetup(amountOfKeySets)
-            for ((i,e) in coordinateKeys.withIndex()){
-                pianoKeys += Rectangle(e.x,e.y,e.keyWidth,e.keyHeight).apply {
-                    if (e.keyHeight != 75.0) {
-                        id = e.keyName
-                        fill = e.color
-                    } else {
-                        id = e.keyName
-                    }
-                }
-            }
+            rectangleSetUp()
             root.getChildList()?.addAll(pianoKeys)
             for (i in root.getChildList()!!.filter { i -> (i as Rectangle).fill == Color.BLACK }) {
                 i.toFront()
@@ -90,7 +92,7 @@ class SaveSong : View("Save") {
                         button("Save and Close").setOnAction {
                             val name = "$s"
                             when{
-                                namedSong.contains(name) -> {
+                                libraryMap.keys.contains(name) -> {
                                  if (!once) {
                                      fieldset("Error: Name Already Exists")
                                      once = true
