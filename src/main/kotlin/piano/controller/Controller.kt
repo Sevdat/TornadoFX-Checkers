@@ -7,9 +7,6 @@ import piano.model.Keys
 import piano.model.loadInstrument
 import java.io.File
 import java.io.FileWriter
-import javax.sound.midi.MidiChannel
-import javax.sound.midi.MidiSystem
-import javax.sound.midi.Synthesizer
 
 // map instead of pair
 // music veriables models
@@ -25,15 +22,24 @@ import javax.sound.midi.Synthesizer
 var notePair = listOf<Pair<Long,Rectangle>>()
 var pianoKeys = listOf<Rectangle>()
 var coordinateKeys = listOf<Keys>()
-var namedSong = listOf<String>()
-var libraryList = listOf<List<Pair<Long,Rectangle>>>()
-var libraryMap = mapOf<String,List<Pair<Long,String>>>()
+
+data class timeAndID(
+        var time:Long,
+        var ID: String
+)
+
+data class nameAndList(
+        var Name:String,
+        var Record: List<timeAndID>
+
+)
+var newLibList = listOf<nameAndList>()
 
 var amountOfKeySets = 3
 const val intensity = 60
 const val volume = 60
 var startRecord = false
-var fileName = "src/main/kotlin/piano/file/PianoSongLibrary.txt"
+var fileName = "PianoSongLibrary.txt"
 var now:Long = 0
 // music buffer notepair. two public method push and getall
 
@@ -74,43 +80,44 @@ fun chooseKey(rec: Rectangle?){
         loadInstrument(indexOfPianoKey + intensity, volume)
 }
 fun save(name:String) {
-        namedSong +=  name
-        libraryList += listOf(notePair)
-
-        var num = listOf<Pair<Long,String>>()
-        var newLong: Long = 0
-        val last = libraryList.last()
-        for ((i,e) in last.withIndex()){
-                newLong = if (i == 0) e.first else e.first - last[i -1].first
-
-                num += Pair(newLong, e.second.id.toString())
+        var newLong: Long
+        var savingToData = listOf<timeAndID>()
+        for ((i,e) in notePair.withIndex()){
+                newLong = if (startRecord == true){
+                        if (i == 0) e.first else e.first - notePair[i -1].first
+                } else e.first
+                savingToData += timeAndID(newLong, e.second.id)
         }
-
-        libraryMap += mapOf(namedSong.last() to num)
+        newLibList += nameAndList(name, savingToData)
         notePair = listOf()
-        saveToFile(namedSong.last())
-
+        if (startRecord == true){
+                saveToFile(name)
+        }
 }
+
  fun saveToFile(name:String){
-         val string = "$name ${libraryMap[name]}\n"
-        FileWriter(fileName,true).use { out -> out.write(string) }
+         val timeIDData = newLibList.find { (i,e) -> i == name }!!.Record
+         var organizeData = ""
+         for (i in timeIDData){
+                 organizeData += "${i.time},${i.ID},"
+         }
+         val string = "$name:${organizeData.dropLast(1)}\n"
+         FileWriter(fileName,true).use { out -> out.write(string) }
  }
 fun getLibrary(fileName:String){
         if (File(fileName).exists() && File(fileName).length() != 0L){
                 val fil = File(fileName).readLines()
                 for (i in fil) {
-                        val k = i.replace(Regex("""[] ]"""), "").split("[")
+                        val k = i.split(":")
                         val name = k[0]
-                        val pair = k[1].split(Regex("""[(), ]""")).filter { it != "" }
-                        var pairList = listOf<Pair<Long,String>>()
+                        val pair = k[1].split(",")
                         var pairCount = 0
                         while (pairCount < pair.size - 1){
-                                pairList += Pair(pair[pairCount].toLong(),pair[pairCount + 1])
+                                notePair += Pair(pair[pairCount].toLong(), pianoKeys[pair[pairCount + 1].toInt()])
                                 pairCount += 2
                         }
-                        libraryMap += mapOf(name to pairList)
+                        save(name)
                 }
-
         }
 }
 
@@ -131,15 +138,12 @@ fun playKey(evt: MouseEvent) {
         }
 }
 
-var longCheck = listOf<Long>()
-var timeCheck = listOf<Long>()
-fun libraryPlay(f:String){
-        for ((i,e) in libraryMap[f]!!){
+fun libraryPlay(name:String){
+        for ((i,e) in newLibList.find { i -> i.Name == name }!!.Record){
                 var nowNow: Long = 0
                 now = System.currentTimeMillis()
                 while (nowNow <= i) nowNow = System.currentTimeMillis() - now
                 chooseKey(pianoKeys[e.toInt()])
-                longCheck += nowNow
         }
 }
 

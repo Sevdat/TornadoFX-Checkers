@@ -19,14 +19,15 @@ fun rectangleSetUp(){
         }
     }
 }
+// dots in pianoview
 class PianoView : View("Piano") {
     override val root = pane()
     init {
         instrumentLoader.open()
-        getLibrary(fileName)
         with(root){
             keySetup(amountOfKeySets)
             rectangleSetUp()
+            getLibrary(fileName)
             root.getChildList()?.addAll(pianoKeys)
             for (i in root.getChildList()!!.filter { i -> (i as Rectangle).fill == Color.BLACK }) {
                 i.toFront()
@@ -52,7 +53,6 @@ class PianoView : View("Piano") {
                             now = System.currentTimeMillis()
                         }
                         stop -> setOnAction {
-                            startRecord = false
                             if (notePair.isNotEmpty()){
                                 SaveSong().openWindow()
                             }
@@ -92,7 +92,7 @@ class SaveSong : View("Save") {
                         button("Save and Close").setOnAction {
                             val name = "$s"
                             when{
-                                libraryMap.keys.contains(name) -> {
+                                newLibList.find { i -> i.Name == name } != null -> {
                                  if (!once) {
                                      fieldset("Error: Name Already Exists")
                                      once = true
@@ -100,6 +100,7 @@ class SaveSong : View("Save") {
                                 }
                                 else -> {
                                     save(name)
+                                    startRecord = false
                                     close()
                                 }
                             }
@@ -124,9 +125,9 @@ class SongLibrary : View("Library") {
                            this.width = 300.0
                            this.height = 300.0
                        }
-                   for (i in libraryMap){
-                       button(i.key) {
-                           setOnAction { libraryPlay(i.key) }
+                   for (i in  newLibList){
+                       button(i.Name) {
+                           setOnAction { libraryPlay(i.Name) }
                        }
                    }
                }

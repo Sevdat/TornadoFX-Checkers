@@ -4,25 +4,26 @@ import javafx.scene.paint.Paint
 import javafx.scene.shape.Rectangle
 import junit.framework.TestCase
 import piano.controller.*
+import piano.model.instrumentLoader
 import piano.view.rectangleSetUp
 import java.io.File
 
 class PianoTest: TestCase(){
     val keyAmount = 3
     init {
+        instrumentLoader.open()
         fileName = "src/test/kotlin/piano/begin/PianoTest.txt"
         File(fileName).createNewFile()
         File(fileName).writeText(
-            "ef [(570, 0), (604, 1), (607, 2)]\n" +
-                "fe [(1816, 0), (584, 4), (539, 2)]\n" +
-                "asdd [(671, 0), (534, 2), (534, 1)]\n" +
-                "fasdd [(670, 0), (1070, 2), (570, 4), (535, 5), (569, 3), (605, 1), (709, 5), (685, 6)]\n" +
-                "asdd ddd [(887, 0), (550, 2), (542, 4), (528, 3)]\n"
+            "huu:626,0,596,2,557,1\n" +
+                    "ytrr:590,0,593,1,557,2,481,4\n" +
+                    "huuu:609,0,713,2,927,1\n"
         )
         keySetup(keyAmount)
         rectangleSetUp()
+
         getLibrary(fileName)
-        libraryPlay(libraryMap.keys.first())
+        libraryPlay(newLibList.first().Name)
         notePair = listOf(
             Pair(680L, Rectangle(98.0, 0.0, 50.0, 150.0).apply {
                 id = "0"
@@ -33,22 +34,33 @@ class PianoTest: TestCase(){
     fun test(){
         assertEquals(keyAmount*12, pianoKeys.size)
         assertEquals(
-            "[(570, 0), (604, 1), (607, 2)]",
-            libraryMap["ef"].toString()
+            "nameAndList(" +
+                    "Name=huu, " +
+                    "Record=[" +
+                    "timeAndID(time=626, ID=0), " +
+                    "timeAndID(time=596, ID=2), " +
+                    "timeAndID(time=557, ID=1)" +
+                    "])",
+            newLibList.find { i -> i.Name == "huu" }.toString()
         )
         assertEquals(
-            "[(670, 0), (1070, 2), (570, 4), (535, 5), (569, 3), (605, 1), (709, 5), (685, 6)]",
-            libraryMap["fasdd"].toString()
+            "nameAndList(" +
+                    "Name=huu, " +
+                    "Record=[" +
+                    "timeAndID(time=626, ID=0), " +
+                    "timeAndID(time=596, ID=2), " +
+                    "timeAndID(time=557, ID=1)" +
+                    "])",
+            newLibList.find { i -> i.Name == "huu" }.toString()
         )
         run{
+            startRecord = true
             save("kek")
             assertEquals(
-                "ef [(570, 0), (604, 1), (607, 2)]\n" +
-                        "fe [(1816, 0), (584, 4), (539, 2)]\n" +
-                        "asdd [(671, 0), (534, 2), (534, 1)]\n" +
-                        "fasdd [(670, 0), (1070, 2), (570, 4), (535, 5), (569, 3), (605, 1), (709, 5), (685, 6)]\n" +
-                        "asdd ddd [(887, 0), (550, 2), (542, 4), (528, 3)]\n" +
-                        "kek [(680, 0)]\n",
+                "huu:626,0,596,2,557,1\n" +
+                        "ytrr:590,0,593,1,557,2,481,4\n" +
+                        "huuu:609,0,713,2,927,1\n" +
+                        "kek:680,0\n",
                 File(fileName).readText()
             )
         }
