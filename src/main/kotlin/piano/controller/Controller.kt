@@ -19,7 +19,7 @@ import java.io.FileWriter
 //        .first { item == it.value }
 //
 //        .index
-var notePair = listOf<Pair<Long,Rectangle>>()
+var notePair = listOf<Pair<Long,String>>()
 var pianoKeys = listOf<Rectangle>()
 var coordinateKeys = listOf<Keys>()
 
@@ -86,7 +86,7 @@ fun save(name:String) {
                 newLong = if (startRecord == true){
                         if (i == 0) e.first else e.first - notePair[i -1].first
                 } else e.first
-                savingToData += timeAndID(newLong, e.second.id)
+                savingToData += timeAndID(newLong, e.second)
         }
         newLibList += nameAndList(name, savingToData)
         notePair = listOf()
@@ -113,7 +113,7 @@ fun getLibrary(fileName:String){
                         val pair = k[1].split(",")
                         var pairCount = 0
                         while (pairCount < pair.size - 1){
-                                notePair += Pair(pair[pairCount].toLong(), pianoKeys[pair[pairCount + 1].toInt()])
+                                notePair += Pair(pair[pairCount].toLong(), pianoKeys[pair[pairCount + 1].toInt()].id)
                                 pairCount += 2
                         }
                         save(name)
@@ -132,7 +132,7 @@ fun playKey(evt: MouseEvent) {
                         chooseKey(this)
                         if (startRecord == true) {
                                 val nowHappening = System.currentTimeMillis() - now
-                                notePair += Pair(nowHappening, this)
+                                notePair += Pair(nowHappening, this.id)
                         }
                 }
         }

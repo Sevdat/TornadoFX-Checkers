@@ -25,10 +25,7 @@ class PianoTest: TestCase(){
         getLibrary(fileName)
         libraryPlay(newLibList.first().Name)
         notePair = listOf(
-            Pair(680L, Rectangle(98.0, 0.0, 50.0, 150.0).apply {
-                id = "0"
-                fill = Paint.valueOf("0x0000ffff")
-            })
+            Pair(680L, "0")
         )
     }
     fun test(){
